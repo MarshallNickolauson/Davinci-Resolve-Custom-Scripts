@@ -148,21 +148,27 @@ resetUI()
 
 clip_list = media_pool.GetRootFolder().GetClipList()
 
+welcome_bookend = None
+closing_bookend = None
+english_dvd_slate = None
+french_dvd_slate = None
+spanish_dvd_slate = None
+nature_video = None
+
 for clip in clip_list:
+    name = str(clip.GetName()).lower()
 
-    name = str(clip.GetName())
-
-    if name.lower().__contains__("welcome"):
+    if "welcome" in name:
         welcome_bookend = clip
-    elif name.lower().__contains__("closing"):
+    elif "closing" in name:
         closing_bookend = clip
-    elif name.lower().__contains__("eng") and name.lower().__contains__("slate"):
+    elif "eng" in name and "slate" in name:
         english_dvd_slate = clip
-    elif name.lower().__contains__("frn") and name.lower().__contains__("slate"):
+    elif "frn" in name and "slate" in name:
         french_dvd_slate = clip
-    elif name.lower().__contains__("spn") and name.lower().__contains__("slate"):
+    elif "spn" in name and "slate" in name:
         spanish_dvd_slate = clip
-    elif name.lower().__contains__("mp4") or name.lower().__contains__("mov"):
+    elif "mp4" in name or "mov" in name:
         nature_video = clip
 
 def make_opening(clip):
@@ -236,12 +242,16 @@ def make_closing(clip):
     
     resetUI()
 
-# TODO if one of these is not None? (try running without a clip): run
-
-make_opening(welcome_bookend)
-# make_opening(english_dvd_slate)
-# make_opening(french_dvd_slate)
-# make_opening(spanish_dvd_slate)
-# make_closing(closing_bookend)
+if nature_video is not None:     
+    if welcome_bookend is not None:
+        make_opening(welcome_bookend)
+    if english_dvd_slate is not None:
+        make_opening(english_dvd_slate)
+    if french_dvd_slate is not None:
+        make_opening(french_dvd_slate)
+    if spanish_dvd_slate is not None:
+        make_opening(spanish_dvd_slate)
+    if closing_bookend is not None:
+        make_closing(closing_bookend)
 
 project.StartRendering()

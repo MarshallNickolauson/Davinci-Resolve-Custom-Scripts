@@ -1,10 +1,15 @@
 # python 3.12
 # pip install pyautogui pillow, pyperclip
+# davinci keyboard shortcuts:
+#         -Console - Ctrl+Shift+`
+#         -Reset UI Layout - Shift+P
 
 import pyautogui
 import pyperclip
 import time
 import sys
+import os
+import re
 
 def wait():
     time.sleep(0.3)
@@ -15,10 +20,6 @@ import pygetwindow as gw
 
 def get_resolve_window():
     resolve_windows = gw.getWindowsWithTitle('DaVinci Resolve')
-
-    if not resolve_windows:
-        raise Exception("DaVinci Resolve window not found")
-
     return resolve_windows[0]
 
 def click(x, y):
@@ -113,6 +114,21 @@ def move_clip_to_v2():
     x_up, y_up = move_mouse_to(x_down, (y_down - 50))
     mouse_up(x_up, y_up)
 
+def extract_sts_number(filename):
+    match = re.search(r'(\d{4})', filename)
+    if match:
+        return match.group(1)
+    return 000
+
+def resetUI():
+    resolve.OpenPage('edit')
+    if sys.platform.startswith('win'):  # Windows
+        pyautogui.hotkey('ctrl', '`')
+        wait()
+    elif sys.platform.startswith('darwin'):  # macOS
+        pyautogui.hotkey('command', '`')
+        wait()
+
 ################################################
 
 resolve = app.GetResolve()
@@ -133,40 +149,36 @@ project.SetSetting("timelineResolutionHeight", str(height))
 ################################################
 # Sequence Below #
 ################################################
-    
-# Reset UI Layout
-def resetUI():
-    resolve.OpenPage('edit')
-    if sys.platform.startswith('win'):  # Windows
-        pyautogui.hotkey('ctrl', '`')
-        wait()
-    elif sys.platform.startswith('darwin'):  # macOS
-        pyautogui.hotkey('command', '`')
-        wait()
 
 resetUI()
 
 clip_list = media_pool.GetRootFolder().GetClipList()
 
+welcome_bookend = None
+closing_bookend = None
+english_dvd_slate = None
+french_dvd_slate = None
+spanish_dvd_slate = None
+nature_video = None
+
 for clip in clip_list:
+    name = str(clip.GetName()).lower()
 
-    name = str(clip.GetName())
-
-    if name.lower().__contains__("welcome"):
+    if "welcome" in name:
         welcome_bookend = clip
-    elif name.lower().__contains__("closing"):
+    elif "closing" in name:
         closing_bookend = clip
-    elif name.lower().__contains__("eng") and name.lower().__contains__("slate"):
+    elif "eng" in name and "slate" in name:
         english_dvd_slate = clip
-    elif name.lower().__contains__("frn") and name.lower().__contains__("slate"):
+    elif "frn" in name and "slate" in name:
         french_dvd_slate = clip
-    elif name.lower().__contains__("spn") and name.lower().__contains__("slate"):
+    elif "spn" in name and "slate" in name:
         spanish_dvd_slate = clip
-    elif name.lower().__contains__("mp4") or name.lower().__contains__("mov"):
+    elif "mp4" in name or "mov" in name:
         nature_video = clip
 
-def make_opening(clip):
-    resolve.OpenPage('edit')
+def make_video(clip):
+    resetUI()
     clip_name = clip.GetName()
     media_pool.CreateEmptyTimeline("Timeline " + clip_name[:-4])
     media_pool.AppendToTimeline(clip)
@@ -181,6 +193,9 @@ def make_opening(clip):
     clip_2 = timeline_clips.get(1)
     clip_2.SetProperty("RetimeProcess", 3)
 
+    if "closing" in clip_name:
+        clip_2.SetProperty("Pan", -850)
+
     press('home')
     click(670, 800)
     get_clip_duration()
@@ -188,9 +203,13 @@ def make_opening(clip):
     click(670, 725)
     set_clip_duration()
 
+    sts_number = extract_sts_number(clip_name)
+    target_dir = os.path.join(os.path.expanduser("~/Desktop"), "Rendered Bookends", sts_number)
+    os.makedirs(target_dir, exist_ok=True)
+
     # Add to Render Queue
     project.SetRenderSettings({
-        'TargetDir': 'C:\\Users\\marsh\\Desktop',
+        'TargetDir': target_dir,
         'CustomName': clip_name[:-4],
         'FrameRate': 59.94,
         'VideoCodec': 'mp4'
@@ -200,48 +219,47 @@ def make_opening(clip):
     
     resetUI()
 
-def make_closing(clip):
-    resolve.OpenPage('edit')
-    clip_name = clip.GetName()
-    media_pool.CreateEmptyTimeline("Timeline " + clip_name[:-4])
-    media_pool.AppendToTimeline(clip)
+if nature_video is not None:
+    # Check if at least one bookend or slate is present
+    if welcome_bookend is not None or english_dvd_slate is not None or \
+       french_dvd_slate is not None or spanish_dvd_slate is not None or \
+       closing_bookend is not None:
+
+        if welcome_bookend is not None:
+            make_video(welcome_bookend)
+        if english_dvd_slate is not None:
+            make_video(english_dvd_slate)
+        if french_dvd_slate is not None:
+            make_video(french_dvd_slate)
+        if spanish_dvd_slate is not None:
+            make_video(spanish_dvd_slate)
+        if closing_bookend is not None:
+            make_video(closing_bookend)
+
+        project.StartRendering()
+    
+    else:
+        print('No bookend or slate picture present')
+        print('OR')
+        print("Bookend / slates don't have proper naming")
+        print("Bookend / slates needs to be named as the following:")
+        print("'#### Welcome/Closing bookend'")
+        print("'#### ENG/SPN/FRN DVD Slate'")
+        print("Where '####' refers to the correct STS number")
+        print('')
+
+        time.sleep(1)
+        pyautogui.hotkey('shift', 'P')
+
+else:
+    print('No nature video present')
+    print('OR')
+    print('Rename nature video to "nature"')
+    print('')
 
     time.sleep(1)
-    move_clip_to_v2()
+    pyautogui.hotkey('shift', 'P')
 
-    media_pool.AppendToTimeline(nature_video)
-
-    current_timeline = project.GetCurrentTimeline()
-    timeline_clips = current_timeline.GetItemsInTrack('video', 1)
-    clip_2 = timeline_clips.get(1)
-    clip_2.SetProperty("RetimeProcess", 3)
-    clip_2.SetProperty("Pan", -850)
-    
-    press('home')
-    click(670, 800)
-    get_clip_duration()
-
-    click(670, 725)
-    set_clip_duration()
-
-    # Add to Render Queue
-    project.SetRenderSettings({
-        'TargetDir': 'C:\\Users\\marsh\\Desktop',
-        'CustomName': clip_name[:-4],
-        'FrameRate': 59.94,
-        'VideoCodec': 'mp4'
-    })
-    project.AddRenderJob()
-    click(1723, 493)
-    
-    resetUI()
-
-# TODO if one of these is not None? (try running without a clip): run
-
-make_opening(welcome_bookend)
-# make_opening(english_dvd_slate)
-# make_opening(french_dvd_slate)
-# make_opening(spanish_dvd_slate)
-# make_closing(closing_bookend)
-
-project.StartRendering()
+# TODO adjust targetDir
+# Open console when fully rendered and say
+# "Bookends rendered to ..."
