@@ -1,5 +1,5 @@
 # python 3.12
-# pip install pyautogui pillow pyperclip
+# pip install pyautogui pillow pyperclip pygetwindow
 # davinci keyboard shortcuts:
 #         -Console - Shift+P
 #         -Reset UI Layout - Shift+0
