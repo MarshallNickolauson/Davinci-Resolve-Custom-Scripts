@@ -1,8 +1,8 @@
 # python 3.12
-# pip install pyautogui pillow, pyperclip
+# pip install pyautogui pillow pyperclip
 # davinci keyboard shortcuts:
-#         -Console - Ctrl+Shift+`
-#         -Reset UI Layout - Shift+P
+#         -Console - Shift+P
+#         -Reset UI Layout - Shift+0
 
 # for the clicks you might need to make an "if mac > do a -10 or something on the y axis"
 # because the fullscreen isn't truly fullscreen
@@ -126,12 +126,8 @@ def extract_sts_number(filename):
 
 def resetUI():
     resolve.OpenPage('edit')
-    if sys.platform.startswith('win'):  # Windows
-        pyautogui.hotkey('ctrl', '`')
-        wait()
-    elif sys.platform.startswith('darwin'):  # macOS
-        pyautogui.hotkey('command', '`')
-        wait()
+    pyautogui.hotkey('shift', '0')
+    wait()
 
 ################################################
 
