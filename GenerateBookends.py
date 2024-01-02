@@ -4,6 +4,10 @@
 #         -Console - Ctrl+Shift+`
 #         -Reset UI Layout - Shift+P
 
+# for the clicks you might need to make an "if mac > do a -10 or something on the y axis"
+# because the fullscreen isn't truly fullscreen
+# or maybe force davinci into fullscreen (if on a mac) and see where the clicks are then
+
 import pyautogui
 import pyperclip
 import time
