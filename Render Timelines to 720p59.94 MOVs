@@ -1,8 +1,10 @@
+# Davinci Resolve v16.2.0
+
 # If you want to use this script you need to customize the following:
 
 frames = 59.94  #adjust
 width = 1280    #adjust
-height = 720    #adjust
+height = 720    #adjust 
 
 import os
 
