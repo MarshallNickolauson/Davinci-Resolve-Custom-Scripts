@@ -1,3 +1,5 @@
+# Davinci Resolve v16.2.0
+
 # python 3.12
 # pip install pyautogui pillow pyperclip pygetwindow
 # davinci keyboard shortcuts:
