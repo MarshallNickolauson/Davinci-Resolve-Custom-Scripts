@@ -3,7 +3,7 @@
 # python 3.12
 # pip install pyautogui opencv-python pillow
 
-# Customize variables below before running
+# Customize variables below before running:
 
 frames = 59.94
 width = 1920
@@ -172,13 +172,13 @@ for clip in clip_list:
 video_list.sort()
 audio_list.sort()
 
-print("Video Clips (sorted):")
-for name, clip in video_list:
-    print(name)
+# print("Video Clips (sorted):")
+# for name, clip in video_list:
+#     print(name)
 
-print("\nAudio Clips (sorted):")
-for name, clip in audio_list:
-    print(name)
+# print("\nAudio Clips (sorted):")
+# for name, clip in audio_list:
+#     print(name)
 
 # media_pool.CreateEmptyTimeline("Timeline Test")
 # media_pool.AppendToTimeline(video_list[0][1])
